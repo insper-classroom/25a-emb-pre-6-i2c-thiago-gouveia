@@ -21,26 +21,21 @@ void i2c_task(void *p) {
     gpio_pull_up(I2C_SDA_GPIO);
     gpio_pull_up(I2C_SCL_GPIO);
 
-    // reset device to its default state
-    // colocando 1 no bit 7 do registrador 0x6B
-    uint8_t buffer_write[2];
-    buffer_write[0] = MPUREG_PWR_MGMT_1; // registrador
-    buffer_write[1] = 1 << 7;            // valor
-    i2c_write_blocking(i2c_default, I2C_CHIP_ADDRESS, buffer_write, 2, false);
+    uint8_t buf[2];
+    buf[0] = MPUREG_PWR_MGMT_1;
+    buf[1] = 1 << 7; 
+    i2c_write_blocking(i2c_default, I2C_CHIP_ADDRESS, buf, 2, false);
 
-    // TODO
-    // Configure o acc para operar em 4G
-    uint8_t set = MPUREG_ACCEL_CONFIG;
-    i2c_write_blocking(i2c_default, I2C_CHIP_ADDRESS, &set, 1, true);  
-    i2c_read_blocking(i2c_default, I2C_CHIP_ADDRESS, &set, 1, false);  
+    uint8_t reg = MPUREG_ACCEL_CONFIG;
+    i2c_write_blocking(i2c_default, I2C_CHIP_ADDRESS, &reg, 1, true);   
+    i2c_read_blocking(i2c_default, I2C_CHIP_ADDRESS, &reg, 1, false); 
 
-    set &= ~0x18;   
-    set |= (1 << 3); 
+    reg &= ~0x18;   
+    reg |= (1 << 3); 
 
-    buffer[0] = MPUREG_ACCEL_CONFIG;
-    buffer[1] = set;
-    i2c_write_blocking(i2c_default, I2C_CHIP_ADDRESS, buffer, 2, false);
-
+    buf[0] = MPUREG_ACCEL_CONFIG;
+    buf[1] = reg;
+    i2c_write_blocking(i2c_default, I2C_CHIP_ADDRESS, buf, 2, false);
 
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(200));
